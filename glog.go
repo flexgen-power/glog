@@ -670,6 +670,10 @@ func (l *loggingT) printWithFileLine(s severity, file string, line int, alsoToSt
 // output writes the data to the log files and releases the buffer.
 func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoToStderr bool) {
 	l.mu.Lock()
+	//set all stderr related flags to false
+	alsoToStderr = false
+	l.alsoToStderr = false
+	l.toStderr = false
 	if l.traceLocation.isSet() {
 		if l.traceLocation.match(file, line) {
 			buf.Write(stacks(false))
@@ -682,25 +686,27 @@ func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoTo
 	} else if l.toStderr {
 		os.Stderr.Write(data)
 	} else {
-		if alsoToStderr || l.alsoToStderr || s >= l.stderrThreshold.get() {
+		/*if alsoToStderr || l.alsoToStderr || s >= l.stderrThreshold.get() {
 			os.Stderr.Write(data)
-		}
+		}*/
 		if l.file[s] == nil {
 			if err := l.createFiles(s); err != nil {
 				os.Stderr.Write(data) // Make sure the message appears somewhere.
 				l.exit(err)
 			}
 		}
+		//write only to appropriate log level file
+		//avoid copies
 		switch s {
 		case fatalLog:
 			l.file[fatalLog].Write(data)
-			fallthrough
+			//fallthrough
 		case errorLog:
 			l.file[errorLog].Write(data)
-			fallthrough
+			//fallthrough
 		case warningLog:
 			l.file[warningLog].Write(data)
-			fallthrough
+			//fallthrough
 		case infoLog:
 			l.file[infoLog].Write(data)
 		}
