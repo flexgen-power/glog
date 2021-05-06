@@ -453,6 +453,7 @@ type loggingT struct {
 	// safely using atomic.LoadInt32.
 	vmodule   moduleSpec // The state of the -vmodule flag.
 	verbosity Level      // V logging level, the value of the -v flag/
+	flushCnt int64
 }
 
 // buffer holds a byte Buffer for reuse. The zero value is ready for use.
@@ -739,9 +740,16 @@ func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoTo
 	}
 	l.putBuffer(buf)
 	l.mu.Unlock()
+	if (l.flushCnt == 0) {
+		l.flushCnt = 100
+	}
 	if stats := severityStats[s]; stats != nil {
 		atomic.AddInt64(&stats.lines, 1)
 		atomic.AddInt64(&stats.bytes, int64(len(data)))
+		if stats.Lines() % l.flushCnt == 0 {
+			//call flush every 100 lines to keep sanity
+			timeoutFlush(10 * time.Second)
+		}
 	}
 }
 
@@ -1183,4 +1191,13 @@ func Exitln(args ...interface{}) {
 func Exitf(format string, args ...interface{}) {
 	atomic.StoreUint32(&fatalNoStacks, 1)
 	logging.printf(fatalLog, format, args...)
+}
+
+/*
+ * configure number of lines to wait until next flush to call
+ */
+func SetFlushCount(val int64) {
+	if val > 0 {
+		logging.flushCnt = val
+	}
 }
