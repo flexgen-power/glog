@@ -1066,49 +1066,65 @@ func (v Verbose) Infof(format string, args ...interface{}) {
 // Info logs to the INFO log.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func Info(args ...interface{}) {
-	logging.print(infoLog, args...)
+	if severity(infoLog) >= logging.stderrThreshold.get() {
+		logging.print(infoLog, args...)
+	}
 }
 
 // InfoDepth acts as Info but uses depth to determine which call frame to log.
 // InfoDepth(0, "msg") is the same as Info("msg").
 func InfoDepth(depth int, args ...interface{}) {
-	logging.printDepth(infoLog, depth, args...)
+	if severity(infoLog) >= logging.stderrThreshold.get() {
+		logging.printDepth(infoLog, depth, args...)
+	}
 }
 
 // Infoln logs to the INFO log.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func Infoln(args ...interface{}) {
-	logging.println(infoLog, args...)
+	if severity(infoLog) >= logging.stderrThreshold.get() {
+		logging.println(infoLog, args...)
+	}
 }
 
 // Infof logs to the INFO log.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func Infof(format string, args ...interface{}) {
-	logging.printf(infoLog, format, args...)
+	if severity(infoLog) >= logging.stderrThreshold.get() {
+		logging.printf(infoLog, format, args...)
+	}
 }
 
 // Warning logs to the WARNING and INFO logs.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func Warning(args ...interface{}) {
-	logging.print(warningLog, args...)
+	if severity(warningLog) >= logging.stderrThreshold.get() {
+		logging.print(warningLog, args...)
+	}
 }
 
 // WarningDepth acts as Warning but uses depth to determine which call frame to log.
 // WarningDepth(0, "msg") is the same as Warning("msg").
 func WarningDepth(depth int, args ...interface{}) {
-	logging.printDepth(warningLog, depth, args...)
+	if severity(warningLog) >= logging.stderrThreshold.get() {
+		logging.printDepth(warningLog, depth, args...)
+	}
 }
 
 // Warningln logs to the WARNING and INFO logs.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func Warningln(args ...interface{}) {
-	logging.println(warningLog, args...)
+	if severity(warningLog) >= logging.stderrThreshold.get() {
+		logging.println(warningLog, args...)
+	}
 }
 
 // Warningf logs to the WARNING and INFO logs.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func Warningf(format string, args ...interface{}) {
-	logging.printf(warningLog, format, args...)
+	if severity(warningLog) >= logging.stderrThreshold.get() {
+		logging.printf(warningLog, format, args...)
+	}
 }
 
 // Error logs to the ERROR, WARNING, and INFO logs.
